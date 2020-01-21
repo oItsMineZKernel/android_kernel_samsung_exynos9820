@@ -784,8 +784,17 @@ static void simulate_WRITE_RO(char *arg)
 	pr_crit("DEBUG TEST: %s()\n", __func__);
 
 // Write to function addr will triger a warning by JOPP compiler
+<<<<<<< HEAD
 	ptr = (unsigned long *)simulate_WRITE_RO;
 	*ptr ^= 0;
+=======
+#ifdef CONFIG_RKP_CFP_JOPP
+	ptr = (unsigned long *)__start_rodata;
+#else
+	ptr = NULL;
+#endif
+	*ptr ^= 0x12345678;
+>>>>>>> a3b52bde11ff (samsung: debug_test: fix linking error for simulate_WRITE_RO())
 }
 
 #define BUFFER_SIZE SZ_1K
