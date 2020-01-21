@@ -133,8 +133,9 @@ build/out/
 out/
 
 # Python cache
-scripts/crypto/__pycache__/
-scripts/fmp/__pycache__/
+*.pyc
+__pycache__/
 
-# tsp_sec
-!firmware/tsp_sec/*
+# samsung
+*.dtbo
+*.reverse.dts
