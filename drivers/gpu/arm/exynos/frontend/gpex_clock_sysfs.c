@@ -25,6 +25,7 @@
 #include <gpex_clboost.h>
 
 #include "gpex_clock_internal.h"
+#include <linux/exynos-ucc.h>
 
 static struct _clock_info *clk_info;
 
@@ -141,6 +142,7 @@ GPEX_STATIC ssize_t reset_time_in_state(const char *buf, size_t count)
 }
 CREATE_SYSFS_DEVICE_WRITE_FUNCTION(reset_time_in_state)
 
+int SUSTAINABLE_FREQ;
 GPEX_STATIC ssize_t set_max_lock_dvfs(const char *buf, size_t count)
 {
 	int ret, clock = 0;
@@ -154,6 +156,9 @@ GPEX_STATIC ssize_t set_max_lock_dvfs(const char *buf, size_t count)
 			GPU_LOG(MALI_EXYNOS_WARNING, "%s: invalid value\n", __func__);
 			return -ENOENT;
 		}
+		
+		if (clock < SUSTAINABLE_FREQ)
+			clock = SUSTAINABLE_FREQ;
 
 		clk_info->user_max_lock_input = clock;
 
@@ -484,7 +489,7 @@ CREATE_SYSFS_KOBJECT_READ_FUNCTION(show_gpu_freq_table)
 
 GPEX_STATIC ssize_t set_gpu_freq_table(const char *buf, size_t count)
 {
-	int id = 4; /* dvfs_g3d */
+	int id = 10; /* dvfs_g3d */
 	unsigned int rate, volt;
 
 	if (sscanf(buf, "%u %u", &rate, &volt) == 2) {
