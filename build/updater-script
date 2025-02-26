@@ -1,0 +1,66 @@
+if is_substring("G970", getprop("ro.boot.bootloader")) || is_substring("G973", getprop("ro.boot.bootloader")) ||  is_substring("G975", getprop("ro.boot.bootloader")) || is_substring("G977", getprop("ro.boot.bootloader")) || is_substring("N970", getprop("ro.boot.bootloader")) || is_substring("N971", getprop("ro.boot.bootloader")) || is_substring("N975", getprop("ro.boot.bootloader")) || is_substring("N976", getprop("ro.boot.bootloader")) then    
+	ui_print(" ");
+	ui_print("-- Starting Zip Installer...");
+else
+    abort("This device is not supported - This kernel only supports N970, N971, N975, N976 F/N");
+endif;
+
+ui_print(" ");
+ui_print("------------------------------------------------------");
+ui_print(" ");
+ui_print("           ____ __         __  ___ _            _____ ");
+ui_print("   ____   /  _// /_ _____ /  |/  /(_)____   ___/__  / ");
+ui_print("  / __ \  / / / __// ___// /|_/ // // __ \ / _ \ / /  ");
+ui_print(" / /_/ /_/ / / /_ (__  )/ /  / // // / / //  __// /__ ");
+ui_print(" \____//___/ \__//____//_/  /_//_//_/ /_/ \___//____/ ");
+ui_print("     __ __                          __      _         ");
+ui_print("    / //_/___   _____ ____   ___   / /  _  | |        ");
+ui_print("   / ,<  / _ \ / ___// __ \ / _ \ / /  (_) / /        ");
+ui_print("  / /| |/  __// /   / / / //  __// /  _   / /         ");
+ui_print(" /_/ |_|\___//_/   /_/ /_/ \___//_/  (_)_/_/          ");
+ui_print("                                       /_/            ");
+ui_print(" ");
+run_program("/sbin/sh", "-c", "sleep 3");
+ui_print("-------------------- Kernel Info ---------------------");
+ui_print(" ");
+ui_print(" Kernel Name: oItsMineZKernel");
+ui_print(" ");
+ui_print(" Kernel Support: Stock Rom Based OneUI3/4");
+ui_print(" ");
+ui_print(" Kernel Binaries Support: 7, 8, and 9");
+ui_print(" ");
+ui_print(" Kernel Author: oItsMineZ");
+ui_print(" ");
+ui_print(" Kernel for Devices: Note10 & S10 Series");
+ui_print(" ");
+run_program("/sbin/sh", "-c", "sleep 1");
+ui_print("------------------------------------------------------");
+ui_print(" ");
+ui_print("-- Installing oItsMineZKernel RIGHT NOW!!!");
+ui_print(" ");
+ui_print("------------------------------------------------------");
+run_program("/sbin/sh", "-c", "sleep 1");
+
+ui_print(" ");
+ui_print("-- Flashing Kernel Image");
+package_extract_file("boot.img", "/dev/block/platform/13d60000.ufs/by-name/boot");
+run_program("/sbin/sh", "-c", "sleep 1");
+
+ui_print(" ");
+ui_print("-- Flashing DTB Image");
+package_extract_file("dtb.img", "/dev/block/platform/13d60000.ufs/by-name/dtb");
+run_program("/sbin/sh", "-c", "sleep 1");
+
+ui_print(" ");
+ui_print("-- Flashing DTBO Image");
+package_extract_file("dtbo.img", "/dev/block/platform/13d60000.ufs/by-name/dtbo");
+run_program("/sbin/sh", "-c", "sleep 1");
+
+ui_print(" ");
+ui_print("------------------------------------------------------");
+ui_print(" ");
+ui_print("-- Installation Done!");
+ui_print(" ");
+ui_print("------------------------------------------------------");
+ui_print(" ");
+set_progress(1.000000);
