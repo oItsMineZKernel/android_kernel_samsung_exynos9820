@@ -3905,19 +3905,6 @@
 		};
 	};
 
-	exynos-debug-test {
-		compatible = "samsung,exynos-debug-test";
-		enabled = [00];
-		ps_hold_control_offset = <0x30c>;
-		nr_cpu = <0x8>;
-		nr_little_cpu = <0x4>;
-		nr_mid_cpu = <0x2>;
-		nr_big_cpu = <0x2>;
-		little_cpu_start = <0x0>;
-		mid_cpu_start = <0x4>;
-		big_cpu_start = <0x6>;
-	};
-
 	pd-aud@15861900 {
 		compatible = "samsung,exynos-pd";
 		reg = <0x0 0x15861900 0x20>;
