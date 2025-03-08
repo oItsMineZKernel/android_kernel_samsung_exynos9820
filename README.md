@@ -1,16 +1,27 @@
-# oItsMineZKernel for OneUI3/4 Exynos 9820/9825 Devices (S10/Note10)
+# oItsMineZKernel for OneUI 3/4 Exynos 9820/9825 Devices (S10/Note10)
 
-<img src="https://github.com/rifsxd/KernelSU-Next/blob/next/assets/kernelsu_next.png" style="width: 96px;" alt="logo">
+<img src="https://github.com/KernelSU-Next/KernelSU-Next/blob/next/assets/kernelsu_next.png" style="width: 96px;" alt="logo">
 
 Stock Kernel with KernelSU Next & SuSFS based on [Kernel Source](https://github.com/ivanmeler/android_kernel_samsung_beyondlte) by [`ivanmeler`](https://github.com/ivanmeler)
 
 ## Features
 
-- OneUI3/4 Support
-- Works on binaries 7, 8 and 9
+- Kernel Based on HVD3 OneUI 4.1 (Binary 7)
+- OneUI 3/4 and Binaries 7, 8 and 9 Support (It may have some issues depending on ROM binary or OneUI version)
 - Implement Ramdisk (No more root loss after reboot)
-- Nuke all Samsung's security feature in the kernel
-- Some patches from ExtremeKernel & ThunderStormS Kernel
+- Nuke all Samsung's Security Feature, Logs & Debug in the Kernel
+- MoroSound
+- WireGuard
+- CPU Input Boost
+- Voltage Control
+- Fingerprint Boost
+- Mali GPU Drivers r36p0 ValHall
+- OC for Little, Mid and Big CPU
+- HZ Tick Set at 100Hz
+- Boeffla Wakelock Blocker
+- Backported Game Misc Control from Samsung S20
+- Bypass Charging (Use power directly from charger)
+- ThunderTweaks Support (You can get ThunderTweaks [here](https://github.com/oItsMineZKernel/Kernel-Patch/raw/refs/heads/main/ThunderTweaks_v1.1.1.5.apk) to customize kernel features)
 - KernelSU Next
 - SuSFS
 
@@ -31,20 +42,17 @@ Warning: `Please backup your modules before flashing this kernel (if you have us
 
 `- All dual sim devices are also supported`
 
-> ✅ Working \
-> ❔ Need Test \
-> ❌ Not Working
 
-| Status |        Name       |  Codename  |    Model   |    Tester   |
-|:------:|:-----------------:|:----------:|:----------:|:-----------:|
-|   ❔   |    Galaxy S10e    | beyond0lte | SM-G970F/N |      -      |
-|   ❔   |     Galaxy S10    | beyond1lte | SM-G973F/N |      -      |
-|   ❔   |    Galaxy S10+    | beyond2lte | SM-G975F/N |      -      |
-|   ❔   |   Galaxy S10 5G   |   beyondx  | SM-G977B/N |      -      |
-|   ✅   |   Galaxy Note10   |     d1     | SM-N970F/N |  [`papal3xa`](https://github.com/ebeth03) |
-|   ❔   |  Galaxy Note10 5G |     d1x    |  SM-N971N  |      -      |
-|   ✅   |   Galaxy Note10+  |     d2s    | SM-N975F/N |  [`oItsMineZ`](https://github.com/oItsMineZ) |
-|   ❔   | Galaxy Note10+ 5G |     d2x    | SM-N976B/N |      -      |
+|        Name       |  Codename  |    Model   |
+:------------------:|:----------:|:----------:|
+|    Galaxy S10e    | beyond0lte | SM-G970F/N |
+|     Galaxy S10    | beyond1lte | SM-G973F/N |
+|    Galaxy S10+    | beyond2lte | SM-G975F/N |
+|   Galaxy S10 5G   |   beyondx  | SM-G977B/N |
+|   Galaxy Note10   |     d1     | SM-N970F/N |
+|  Galaxy Note10 5G |     d1x    |  SM-N971N  |
+|   Galaxy Note10+  |     d2s    | SM-N975F/N |
+| Galaxy Note10+ 5G |     d2x    | SM-N976B/N |
 
 ## Build Instructions:
 
@@ -54,29 +62,25 @@ Warning: `Please backup your modules before flashing this kernel (if you have us
 
 2. Clone repository
 
-```html
+```
 git clone https://github.com/oItsMineZKernel/android_kernel_samsung_exynos9820
 ```
 
 3. Build for your device
 
-```html
-./build.sh -m d2s -k y
+```
+./build.sh -m d2s
 ```
 
 4. Fetch the flashable zip of the kernel that was just compiled
 
-```html
-build/export/oItsMineZKernel-v...zip
+```
+build/export/oItsMineZKernel-Unofficial...zip
 ```
 
 5. Flash it using a supported recovery like TWRP
 
 6. Enjoy!
-
-## Special Thanks
-
-- [`papal3xa`](https://github.com/ebeth03) for testing my kernel on his d1 many times and trying to flash on OneUI 3, as well as binaries 7, 8, and 9!
 
 ## Credits
 
@@ -85,3 +89,4 @@ build/export/oItsMineZKernel-v...zip
 - [`ivanmeler`](https://github.com/ivanmeler) for [Kernel Source](https://github.com/ivanmeler/android_kernel_samsung_beyondlte)
 - [`Ocin4ever`](https://github.com/Ocin4ever) & [`ExtremeXT`](https://github.com/ExtremeXT) for [ExtremeKernel](https://github.com/Ocin4ever/ExtremeKernel)
 - [`ThunderStorms21th`](https://github.com/ThunderStorms21th) for [ThunderStormS Kernel](https://github.com/ThunderStorms21th/S10-source)
+- [`evdenis`](https://github.com/evdenis) for [CruelKernel](https://github.com/CruelKernel/samsung-exynos9820)

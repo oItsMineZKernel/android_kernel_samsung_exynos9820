@@ -15,7 +15,7 @@ unset_flags()
 Usage: $(basename "$0") [options]
 Options:
     -m, --model [value]    Specify the model code of the phone
-    -k, --ksu [y/N]        Include KernelSU Next with SuSFS
+    -k, --ksu [y/N]        Include KernelSU Next with SuSFS (default: y)
 EOF
 }
 
@@ -27,6 +27,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --ksu|-k)
             KSU_OPTION="$2"
+            shift 2
+            ;;
+        --ver|-v)
+            KERNEL_VERSION="$2"
             shift 2
             ;;
         *)\
@@ -81,7 +85,7 @@ d2x)
 esac
 
 if [ -z $KSU_OPTION ]; then
-    read -p "Include KernelSU Next with SuSFS (y/N): " KSU_OPTION
+    KSU_OPTION="y"
 fi
 
 if [[ "$KSU_OPTION" == "y" ]]; then
@@ -93,7 +97,7 @@ if [[ "$KSU_OPTION" == "y" ]]; then
         echo "-----------------------------------------------"
     else
         echo "-----------------------------------------------"
-        echo "Checkout KernelSU-Next Repo..."
+        echo "Checkout oItsMineZ's KernelSU-Next Repo..."
         echo "-----------------------------------------------"
 
         git submodule add --force https://github.com/oItsMineZ/KernelSU-Next
@@ -107,6 +111,10 @@ if [[ "$KSU_OPTION" == "y" ]]; then
         patch -p1 < SuSFS.patch
         rm -rf *.patch
     fi
+fi
+
+if [ -z "$KERNEL_VERSION" ]; then
+    KERNEL_VERSION="Unofficial"
 fi
 
 FUNC_TOOLCHAIN()
@@ -126,6 +134,7 @@ FUNC_BUILD_KERNEL()
     echo "Device: "$MODEL""
     echo "SOC: Exynos$SOC"
     echo "Defconfig: "$KERNEL_DEFCONFIG""
+    echo "Kernel Version: $KERNEL_VERSION"
 
     if [ -z "$KSU_NEXT" ]; then
         echo "KernelSU Next with SuSFS: Not Include"
@@ -133,9 +142,15 @@ FUNC_BUILD_KERNEL()
         echo "KernelSU Next with SuSFS: $KSU_NEXT"
     fi
 
+    echo -e "CONFIG_LOCALVERSION_AUTO=n" > $RDIR/arch/arm64/configs/version.config
+    
     if [[ "$SOC" == "9825" ]]; then
-        N10=exynos9825.config
+        DEVICE=Note10
+    else
+        DEVICE=S10
     fi
+
+    echo -e "CONFIG_LOCALVERSION=\"-oItsMineZKernel-"$KERNEL_VERSION"-"$DEVICE"\"" >> $RDIR/arch/arm64/configs/version.config
 
     echo "-----------------------------------------------"
     echo "Building Kernel Using "$KERNEL_DEFCONFIG""
@@ -144,7 +159,7 @@ FUNC_BUILD_KERNEL()
 
     make -j$BUILD_JOB_NUMBER ARCH=arm64 \
         CROSS_COMPILE=$BUILD_CROSS_COMPILE O=out \
-        $KERNEL_DEFCONFIG oitsminez.config $KSU_NEXT $N10 || abort
+        $KERNEL_DEFCONFIG oitsminez.config version.config $KSU_NEXT || abort
 
 
     echo "-----------------------------------------------"
@@ -217,7 +232,6 @@ FUNC_BUILD_ZIP()
     # Build zip
     echo "-----------------------------------------------"
     echo "Building Zip..."
-    echo "-----------------------------------------------"
 
     rm -rf $RDIR/build/out/$MODEL/zip
     mkdir -p $RDIR/build/export
@@ -233,22 +247,30 @@ FUNC_BUILD_ZIP()
     cp $RDIR/build/update-binary $RDIR/build/out/$MODEL/zip/META-INF/com/google/android/
     cd $RDIR/build/out/$MODEL/zip
 
-    if [ "$SOC" == "9825" ]; then
-        version=$(grep -o 'CONFIG_LOCALVERSION="[^"]*"' "$RDIR"/arch/arm64/configs/exynos9825.config | cut -d '"' -f 2)
-    else
-        version=$(grep -o 'CONFIG_LOCALVERSION="[^"]*"' "$RDIR"/arch/arm64/configs/oitsminez.config | cut -d '"' -f 2)
-    fi
+    sed -i "s/ui_print(\" Kernel Version: \");/ui_print(\" Kernel Version: $KERNEL_VERSION\");/" $RDIR/build/out/$MODEL/zip/META-INF/com/google/android/updater-script
+    sed -i "s/ui_print(\" Kernel Device: \");/ui_print(\" Kernel Device: $DEVICE ($MODEL)\");/" $RDIR/build/out/$MODEL/zip/META-INF/com/google/android/updater-script
 
+    version=$(grep -o 'CONFIG_LOCALVERSION="[^"]*"' "$RDIR"/arch/arm64/configs/version.config | cut -d '"' -f 2)
     version=${version:1}
-    DATE=`date +"%d-%m-%Y_%H-%M-%S"`    
-    NAME="$version"-"$MODEL"-KSU-NEXT+SuSFS-"$DATE".zip
+
+    DATE=`date +"%d-%m-%Y"`    
+    NAME="$version"-"$MODEL".zip
 
     zip -r ../"$NAME" .
     rm -rf $RDIR/build/out/$MODEL/zip
     mv $RDIR/build/out/$MODEL/"$NAME" $RDIR/build/export/"$NAME"
     cd $RDIR/build/export
+}
+
+FUNC_CLEANUP()
+{
+    echo "-----------------------------------------------"
+    echo "Cleanup build files..."
+    echo "-----------------------------------------------"
 
     rm -rf $RDIR/build/AIK/ramdisk/fstab.exynos*
+    rm -rf $RDIR/arch/arm64/configs/version.config
+    git reset $RDIR/build/AIK/split_img/boot.img-board
 }
 
 # MAIN FUNCTION
@@ -271,11 +293,11 @@ rm -rf ./build.log
     FUNC_BUILD_DTBO
     FUNC_BUILD_RAMDISK
     FUNC_BUILD_ZIP
+    FUNC_CLEANUP
 
     END_TIME=`date +%s`
 
     let "ELAPSED_TIME=$END_TIME-$START_TIME"
-    git restore $RDIR/build/AIK/split_img/boot.img-board
 
     echo "-----------------------------------------------"
     echo "Total compile time was $ELAPSED_TIME seconds"
