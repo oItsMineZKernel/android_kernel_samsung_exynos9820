@@ -63,7 +63,9 @@ FUNC_CHECKENV()
     fi
 }
 
-export BUILD_CROSS_COMPILE=$(pwd)/toolchain/aarch64-linux-android-4.9/bin/aarch64-linux-androidkernel-
+export BUILD_CROSS_COMPILE=aarch64-linux-gnu-
+export BUILD_CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+export BUILD_CC=clang
 export BUILD_JOB_NUMBER=`grep -c ^processor /proc/cpuinfo`
 RDIR=$(pwd)
 
@@ -174,7 +176,9 @@ FUNC_BUILD_KERNEL()
     echo "-----------------------------------------------"
 
     make -j$BUILD_JOB_NUMBER ARCH=arm64 \
-        CROSS_COMPILE=$BUILD_CROSS_COMPILE O=out \
+        CROSS_COMPILE=$BUILD_CROSS_COMPILE \
+        CROSS_COMPILE_ARM32=$BUILD_CROSS_COMPILE_ARM32 \
+        CC=$BUILD_CC O=out \
         $KERNEL_DEFCONFIG oitsminez.config version.config $KSU_NEXT || abort
 
 
@@ -183,7 +187,9 @@ FUNC_BUILD_KERNEL()
     echo "-----------------------------------------------"
 
     make -j$BUILD_JOB_NUMBER ARCH=arm64 \
-        CROSS_COMPILE=$BUILD_CROSS_COMPILE O=out || abort
+        CROSS_COMPILE=$BUILD_CROSS_COMPILE \
+        CROSS_COMPILE_ARM32=$BUILD_CROSS_COMPILE_ARM32 \
+        CC=$BUILD_CC O=out || abort
 
     echo "-----------------------------------------------"
     echo " Finished Kernel Build!"

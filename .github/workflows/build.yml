@@ -30,7 +30,7 @@ jobs:
 
       - name: Setup Build Environment
         run: |
-          sudo apt update && sudo apt upgrade -y && sudo apt install gcc-aarch64-linux-gnu -y
+          sudo apt update && sudo apt upgrade -y && sudo apt install -y -qq llvm lld clang gcc-aarch64-linux-gnu gcc-arm-none-eabi
           
       - name: Set Environment Variable
         run: |
