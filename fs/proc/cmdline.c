@@ -107,6 +107,10 @@ static int __init proc_cmdline_init(void)
 	process_flag(FLAG_REPLACE, "androidboot.verifiedbootstate=", "green"); // Play Integrity API / SafetyNet
 	process_flag(FLAG_REPLACE, "androidboot.warranty_bit=", "0"); // Bootloader status and Knox
 	process_flag(FLAG_REPLACE, "androidboot.fmp_config=", "1"); // Samsung Knox FMP / FIPS
+	process_flag(FLAG_REPLACE, "init.svc.adbd=", "stopped"); // Hide adbd is running
+	process_flag(FLAG_REPLACE, "ro.crypto.state=", "encrypted"); // Force encrypted status
+	process_flag(FLAG_REPLACE, "ro.oem_unlock_supported=", "0"); // Reset oem unlock toggle to disable
+	process_flag(FLAG_REPLACE, "sys.oem_unlock_allowed=", "0"); // Reset oem unlock allowed to disable
 #endif
 
 	proc_create("cmdline", 0, NULL, &cmdline_proc_fops);
