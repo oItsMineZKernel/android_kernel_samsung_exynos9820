@@ -1,17 +1,17 @@
 name: Build (CI)
-run-name: ${{ github.event.inputs.action }}
+run-name: 'CI: Build ${{ github.event.inputs.version }} from ${{ github.sha }}'
 
 on:
   workflow_dispatch:
     inputs:
-      action:
-        description: 'Action Name'
-        required: true
-        default: 'Build (CI) v'
-      tag:
+      version:
         description: 'Kernel Version'
         required: true
         default: 'v'
+      devices:
+        description: 'Devices'
+        required: true
+        default: '["beyond0lte", "beyond1lte", "beyond2lte", "beyondx", "d1", "d1x", "d2s", "d2x"]'
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
       contents: write
     strategy:
       matrix:
-        device: [beyond0lte, beyond1lte, beyond2lte, beyondx, d1, d1x, d2s, d2x]
+        device: ${{ fromJSON(github.event.inputs.devices) }}
 
     steps:
       - name: Checkout Tree
@@ -30,24 +30,26 @@ jobs:
 
       - name: Setup Build Environment
         run: |
-          sudo apt update -y
-          sudo apt-get update --fix-missing && sudo apt-get install bc bison build-essential zstd clang flex gnupg gperf ccache liblz4-tool libsdl1.2-dev libstdc++6 libxml2 libxml2-utils lzop pngcrush schedtool xsltproc zlib1g-dev libncurses5-dev bzip2 gcc g++ libssl-dev openssl -y && sudo apt-get install gcc-aarch64-linux-gnu -y && sudo apt-get install lld llvm python-is-python3 device-tree-compiler cpio -y
-          wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb && sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
+          sudo apt update && sudo apt upgrade -y && sudo apt install gcc-aarch64-linux-gnu -y
           
       - name: Set Environment Variable
         run: |
-          echo "BUILD_DATE=$(date +"%d-%m-%Y_%H-%M-%S")" >> $GITHUB_ENV
-          echo "BUILD_KERNEL_VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date +"%d-%m-%Y")" >> $GITHUB_ENV
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "COMMIT_SHA=$calculatedSha" >> $GITHUB_ENV
+          echo "BUILD_KERNEL_VERSION=CI-${{ github.event.inputs.version }}-$calculatedSha" >> $GITHUB_ENV
           
       - name: Building Kernel
         run: |
-            bash build-ci.sh -m ${{ matrix.device }} -k y
-
+            bash build-ci.sh -m ${{ matrix.device }} -k y -v ${{ env.BUILD_KERNEL_VERSION }}
+      - name: Check Kernel File
+        run: |
+          if [ -z "$(find build/out/${{ matrix.device }} -name 'boot.img' -type f 2>/dev/null)" ]; then
+             echo "No kernel files found. Cancel the workflow."
+             exit 1
+          fi
       - name: Upload Kernel
         uses: actions/upload-artifact@v4
         with:
-          name: "oItsMineZKernel-CI-${{ env.BUILD_KERNEL_VERSION }}-${{ env.COMMIT_SHA }}-${{ matrix.device }}-KSU-NEXT+SuSFS-${{ env.BUILD_DATE }}"
+          name: "oItsMineZKernel-${{ env.BUILD_KERNEL_VERSION }}-${{ matrix.device }}-${{ env.BUILD_DATE }}"
           path: |
             build/out/${{ matrix.device }}/zip/*

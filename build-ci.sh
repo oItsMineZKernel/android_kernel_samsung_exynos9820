@@ -1,5 +1,13 @@
 #!/bin/bash
 
+is_github_actions() {
+    if [ -z "$calculatedSha" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 abort()
 {
     cd -
@@ -9,13 +17,15 @@ abort()
     exit -1
 }
 
+ARGS="$@"
+
 unset_flags()
 {
     cat << EOF
 Usage: $(basename "$0") [options]
 Options:
     -m, --model [value]    Specify the model code of the phone
-    -k, --ksu [y/N]        Include KernelSU Next with SuSFS
+    -k, --ksu [y/N]        Include KernelSU Next with SuSFS (default: y)
 EOF
 }
 
@@ -29,12 +39,29 @@ while [[ $# -gt 0 ]]; do
             KSU_OPTION="$2"
             shift 2
             ;;
+        --ver|-v)
+            KERNEL_VERSION="$2"
+            shift 2
+            ;;
         *)\
             unset_flags
             exit 1
             ;;
     esac
 done
+
+FUNC_CHECKENV()
+{
+    if is_github_actions; then
+        echo "-----------------------------------------------"
+        echo "Running on Github Actions..."
+    else
+        echo "-----------------------------------------------"
+        echo "Not on Github Actions! Switching to build.sh..."
+        echo "-----------------------------------------------"
+        exec ./build.sh $ARGS
+    fi
+}
 
 export BUILD_CROSS_COMPILE=$(pwd)/toolchain/aarch64-linux-android-4.9/bin/aarch64-linux-androidkernel-
 export BUILD_JOB_NUMBER=`grep -c ^processor /proc/cpuinfo`
@@ -81,13 +108,14 @@ d2x)
 esac
 
 if [ -z $KSU_OPTION ]; then
-    read -p "Include KernelSU Next with SuSFS (y/N): " KSU_OPTION
+    KSU_OPTION="y"
 fi
 
 if [[ "$KSU_OPTION" == "y" ]]; then
+    FUNC_CHECKENV
     KSU_NEXT=ksu_next.config
     echo "-----------------------------------------------"
-    echo "Checkout KernelSU-Next Repo..."
+    echo "Checkout oItsMineZ's KernelSU-Next Repo..."
     echo "-----------------------------------------------"
 
     git submodule add --force https://github.com/oItsMineZ/KernelSU-Next
@@ -99,6 +127,10 @@ if [[ "$KSU_OPTION" == "y" ]]; then
 
     curl -LOSs "https://raw.githubusercontent.com/oItsMineZKernel/Kernel-Patch/main/SuSFS.patch"
     patch -p1 < SuSFS.patch
+fi
+
+if [ -z "$KERNEL_VERSION" ]; then
+    KERNEL_VERSION="Unofficial"
 fi
 
 FUNC_TOOLCHAIN()
@@ -118,6 +150,7 @@ FUNC_BUILD_KERNEL()
     echo "Device: "$MODEL""
     echo "SOC: Exynos$SOC"
     echo "Defconfig: "$KERNEL_DEFCONFIG""
+    echo "Kernel Version: $KERNEL_VERSION"
 
     if [ -z "$KSU_NEXT" ]; then
         echo "KernelSU Next with SuSFS: Not Include"
@@ -125,9 +158,15 @@ FUNC_BUILD_KERNEL()
         echo "KernelSU Next with SuSFS: $KSU_NEXT"
     fi
 
+    echo -e "CONFIG_LOCALVERSION_AUTO=n" > $RDIR/arch/arm64/configs/version.config
+
     if [[ "$SOC" == "9825" ]]; then
-        N10=exynos9825.config
+        DEVICE=Note10
+    else
+        DEVICE=S10
     fi
+
+    echo -e "CONFIG_LOCALVERSION=\"-oItsMineZKernel-"$KERNEL_VERSION"-"$DEVICE"\"" >> $RDIR/arch/arm64/configs/version.config
 
     echo "-----------------------------------------------"
     echo "Building Kernel Using "$KERNEL_DEFCONFIG""
@@ -136,7 +175,7 @@ FUNC_BUILD_KERNEL()
 
     make -j$BUILD_JOB_NUMBER ARCH=arm64 \
         CROSS_COMPILE=$BUILD_CROSS_COMPILE O=out \
-        $KERNEL_DEFCONFIG oitsminez.config $KSU_NEXT $N10 || abort
+        $KERNEL_DEFCONFIG oitsminez.config version.config $KSU_NEXT || abort
 
 
     echo "-----------------------------------------------"
@@ -205,7 +244,6 @@ FUNC_BUILD_ZIP()
     # Build zip
     echo "-----------------------------------------------"
     echo "Building zip..."
-    echo "-----------------------------------------------"
 
     mkdir -p $RDIR/build/export
     mkdir -p $RDIR/build/out/$MODEL/zip
@@ -218,6 +256,8 @@ FUNC_BUILD_ZIP()
     cp $RDIR/build/out/$MODEL/dtbo_$MODEL.img $RDIR/build/out/$MODEL/zip/dtbo.img
     cp $RDIR/build/updater-script $RDIR/build/out/$MODEL/zip/META-INF/com/google/android/
     cp $RDIR/build/update-binary $RDIR/build/out/$MODEL/zip/META-INF/com/google/android/
+    sed -i "s/ui_print(\" Kernel Version: \");/ui_print(\" Kernel Version: $KERNEL_VERSION\");/" $RDIR/build/out/$MODEL/zip/META-INF/com/google/android/updater-script
+    sed -i "s/ui_print(\" Kernel Device: \");/ui_print(\" Kernel Device: $DEVICE ($MODEL)\");/" $RDIR/build/out/$MODEL/zip/META-INF/com/google/android/updater-script
 }
 
 # MAIN FUNCTION

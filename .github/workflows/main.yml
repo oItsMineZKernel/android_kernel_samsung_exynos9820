@@ -1,13 +1,13 @@
-name: Build & Release
-run-name: ${{ github.event.inputs.action }}
+name: Build (Release)
+run-name: 'Release: Build ${{ github.event.inputs.version }} from ${{ github.sha }}'
 
 on:
   workflow_dispatch:
     inputs:
-      action:
-        description: 'Action Name'
+      version:
+        description: 'Kernel Version'
         required: true
-        default: 'Build & Release v'
+        default: 'v'
       tag:
         description: 'Release Tag'
         required: true
@@ -30,25 +30,30 @@ jobs:
 
       - name: Setup Build Environment
         run: |
-          sudo apt update -y
-          sudo apt-get update --fix-missing && sudo apt-get install bc bison build-essential zstd clang flex gnupg gperf ccache liblz4-tool libsdl1.2-dev libstdc++6 libxml2 libxml2-utils lzop pngcrush schedtool xsltproc zlib1g-dev libncurses5-dev bzip2 gcc g++ libssl-dev openssl -y && sudo apt-get install gcc-aarch64-linux-gnu -y && sudo apt-get install lld llvm python-is-python3 device-tree-compiler cpio -y
-          wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb && sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
+          sudo apt update && sudo apt upgrade -y && sudo apt install gcc-aarch64-linux-gnu -y
           
       - name: Set Environment Variable
         run: |
-          echo "BUILD_DATE=$(date +"%d-%m-%Y_%H-%M-%S")" >> $GITHUB_ENV
-          echo "BUILD_KERNEL_VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date +"%d-%m-%Y")" >> $GITHUB_ENV
+          echo "BUILD_KERNEL_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHA=$calculatedSha" >> $GITHUB_ENV
           
       - name: Building Kernel
         run: |
-            bash build.sh -m ${{ matrix.device }} -k y
+            bash build.sh -m ${{ matrix.device }} -k y -v ${{ env.BUILD_KERNEL_VERSION }}
+
+      - name: Check Kernel Zip File
+        run: |
+          if [ -z "$(find build/export -name '*.zip' -type f 2>/dev/null)" ]; then
+             echo "No zip files found. Cancel the workflow."
+             exit 1
+          fi
 
       - name: Upload Kernel
         uses: actions/upload-artifact@v4
         with:
-          name: "oItsMineZKernel-${{ env.BUILD_KERNEL_VERSION }}-${{ matrix.device }}-KSU-NEXT+SuSFS-${{ env.BUILD_DATE }}"
+          name: "oItsMineZKernel-${{ env.BUILD_KERNEL_VERSION }}-${{ env.COMMIT_SHA }}-${{ matrix.device }}"
           path: |
             build/export/*.zip
 
@@ -69,10 +74,10 @@ jobs:
         with:
           tag: ${{ github.event.inputs.tag }}
           name: "${{ github.event.inputs.tag }}"
-          draft: false
-          prerelease: false
+          draft: true
+          generateReleaseNotes: true
           makeLatest: true
           skipIfReleaseExists: true
           token: ${{ secrets.TOKEN }}          
           artifacts: "artifacts/**/*.zip"
-          body: "Commit SHA: ${{ github.sha }}"
+            
