@@ -40,9 +40,6 @@
 #define GAME_NORMAL_MIF_MAX	2093000             // 2730000
 #define GAME_NORMAL_MIF_MIN	1539000             // 421000
 
-
-static struct emstune_mode_request emstune_req_gmc;
-
 extern unsigned int get_cpufreq_max_limit(void);
 extern unsigned int get_ocp_clipped_freq(void);
 
@@ -134,7 +131,6 @@ static int gmc_thread(void *data)
 	pm_qos_add_request(&pm_qos_mif_min, PM_QOS_BUS_THROUGHPUT, PM_QOS_BUS_THROUGHPUT_DEFAULT_VALUE);
 	pm_qos_add_request(&pm_qos_gpu_max, PM_QOS_GPU_THROUGHPUT_MAX, PM_QOS_GPU_FREQ_MAX_DEFAULT_VALUE);
 	pm_qos_add_request(&pm_qos_gpu_min, PM_QOS_GPU_THROUGHPUT_MIN, PM_QOS_GPU_FREQ_MIN_DEFAULT_VALUE);				
-	emstune_add_request(&emstune_req_gmc);
 
 	while (is_running) {
 
