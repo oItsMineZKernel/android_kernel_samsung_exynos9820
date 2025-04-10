@@ -61,9 +61,20 @@ package_extract_file("dtbo.img", "/dev/block/platform/13d60000.ufs/by-name/dtbo"
 run_program("/sbin/sh", "-c", "sleep 1");
 
 ui_print(" ");
+ui_print("-- Adding Kernel Addons Module to Storage");
+package_extract_file("module.zip", "/sdcard/oItsMineZKernel-Addons-.zip");
+run_program("/sbin/sh", "-c", "sleep 1");
+
+ui_print(" ");
 ui_print("------------------------------------------------------");
 ui_print(" ");
 ui_print("-- Installation Done!");
+ui_print(" ");
+ui_print("----------------------- Notes ------------------------");
+ui_print(" ");
+ui_print("-- Don't forget to install kernel addons module on");
+ui_print(" ");
+ui_print("   /sdcard/oItsMineZKernel-Addons-.zip");
 ui_print(" ");
 ui_print("------------------------------------------------------");
 ui_print(" ");

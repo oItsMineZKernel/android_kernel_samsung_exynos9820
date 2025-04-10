@@ -34,22 +34,17 @@ jobs:
           
       - name: Set Environment Variable
         run: |
-          echo "BUILD_DATE=$(date +"%d-%m-%Y")" >> $GITHUB_ENV
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "BUILD_KERNEL_VERSION=CI-${{ github.event.inputs.version }}-$calculatedSha" >> $GITHUB_ENV
+          SHA=$(git rev-parse --short ${{ github.sha }})
+          echo BUILD_DATE=$(date +'%Y%m%d') >> $GITHUB_ENV
+          echo BUILD_KERNEL_VERSION=CI-${{ github.event.inputs.version }}-$SHA >> $GITHUB_ENV
           
       - name: Building Kernel
         run: |
-            bash build-ci.sh -m ${{ matrix.device }} -k y -v ${{ env.BUILD_KERNEL_VERSION }}
-      - name: Check Kernel File
-        run: |
-          if [ -z "$(find build/out/${{ matrix.device }} -name 'boot.img' -type f 2>/dev/null)" ]; then
-             echo "No kernel files found. Cancel the workflow."
-             exit 1
-          fi
+            bash build.sh -m ${{ matrix.device }} -v ${{ env.BUILD_KERNEL_VERSION }} -r n
+
       - name: Upload Kernel
         uses: actions/upload-artifact@v4
         with:
-          name: "oItsMineZKernel-${{ env.BUILD_KERNEL_VERSION }}-${{ matrix.device }}-${{ env.BUILD_DATE }}"
-          path: |
-            build/out/${{ matrix.device }}/zip/*
+          name: "oItsMineZKernel-${{ env.BUILD_KERNEL_VERSION }}-${{ env.BUILD_DATE }}-${{ env.BUILD_DEVICE }}-${{ matrix.device }}"
+          path: "build/out/${{ matrix.device }}/zip/*"
+          if-no-files-found: error

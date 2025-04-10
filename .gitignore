@@ -40,8 +40,10 @@
 *.tar
 *.xz
 *.log
+.gitmodules
 Module.symvers
 modules.builtin
+.wireguard-fetch-lock
 
 #
 # Top-level generic files
@@ -105,6 +107,7 @@ GTAGS
 # id-utils files
 ID
 
+*.rej
 *.orig
 *~
 \#*#
@@ -127,7 +130,9 @@ all.config
 # fetched Android config fragments
 kernel/configs/android-*.cfg
 
-# Auxiliary build files
+# Build files
+build/AIK/split_img/boot.img-kernel
+build/AIK/ramdisk-new.cpio.gz
 build/export/
 build/out/
 out/
@@ -136,5 +141,9 @@ out/
 scripts/crypto/__pycache__/
 scripts/fmp/__pycache__/
 
-# tsp_sec
-!firmware/tsp_sec/*
+# KernelSU-Next
+KernelSU-Next/
+
+# Toolchains
+toolchain/clang-r416183b1/
+toolchain/aarch64-linux-android-4.9/

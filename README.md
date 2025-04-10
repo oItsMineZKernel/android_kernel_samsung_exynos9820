@@ -9,6 +9,7 @@ Stock Kernel with KernelSU Next & SuSFS based on [Kernel Source](https://github.
 - Kernel Based on HVD3 OneUI 4.1 (Binary 7)
 - OneUI 3/4 and Binaries 7, 8 and 9 Support (It may have some issues depending on ROM binary or OneUI version)
 - Implement Ramdisk (No more root loss after reboot)
+- Upstream from 4.14.113 to 4.14.120 with Linux Stable
 - Nuke all Samsung's Security Feature, Logs & Debug in the Kernel
 - MoroSound
 - WireGuard
@@ -33,7 +34,8 @@ Stock Kernel with KernelSU Next & SuSFS based on [Kernel Source](https://github.
 - And more... (It should work if your ROM is based on stock ROM)
 
 ## How to Install
-- Flash Zip file via `TWRP`
+- Flash kernel zip file via `TWRP`
+- Install `Kernel Addons` on `/sdcard/Downloads/oItsMineZKernel-Addons-[version].zip`
 - Install `KernelSU Next` from [Here](https://github.com/rifsxd/KernelSU-Next/releases)
 - Install `susfs4ksu module` from [Here](https://github.com/sidex15/susfs4ksu-module/releases)
 
@@ -68,13 +70,13 @@ git clone https://github.com/oItsMineZKernel/android_kernel_samsung_exynos9820
 3. Build for your device
 
 ```
-./build.sh -m d2s
+./build.sh -m [device_codename]
 ```
 
 4. Fetch the flashable zip of the kernel that was just compiled
 
 ```
-build/export/oItsMineZKernel-Unofficial...zip
+build/export/oItsMineZKernel-Unofficial-[your_device].zip
 ```
 
 5. Flash it using a supported recovery like TWRP
